@@ -5,6 +5,7 @@ const ZERO: u8 = 48; // '0'.to_digit(10).unwrap() as u8;
 const NINE: u8 = 57; // '9'.to_digit(10).unwrap() as u8;
 const COMMA: u8 = 44; // ','.to_digit(10).unwrap() as u8;
 
+#[derive(Debug)]
 pub struct Payload {
     pub response_size: u32,
     pub sleep_time: Duration,
@@ -17,8 +18,8 @@ impl Payload {
         }
         let bytes = val.unwrap().as_bytes();
         let mut comma_found = false;
-        let mut response_size: u32 = 0;
-        let mut sleep_time_millis: u32 = 0;
+        let mut response_size: i32 = -1;
+        let mut sleep_time_millis: i32 = -1;
         for byte in bytes {
             let byte = *byte;
             if byte == COMMA {
@@ -31,20 +32,20 @@ impl Payload {
             if byte < ZERO || byte > NINE {
                 return Err(format!("Invalid char found: '{}'", byte as char));
             }
-            let num = (byte - ZERO) as u32;
+            let num = (byte - ZERO) as i32;
             if comma_found {
-                response_size = response_size * 10 + num;
+                response_size = (response_size >= 0) as i32 * response_size * 10 + num;
             } else {
-                sleep_time_millis = sleep_time_millis * 10 + num;
+                sleep_time_millis = (sleep_time_millis >= 0) as i32 * sleep_time_millis * 10 + num;
             }
         }
-        if sleep_time_millis == 0 || response_size == 0 {
+        if sleep_time_millis < 0 || response_size < 0 {
             return Err(String::from(
                 "Must specify both response size and sleep time separated by a comma",
             ));
         }
         Ok(Payload {
-            response_size,
+            response_size: response_size as u32,
             sleep_time: Duration::from_millis(sleep_time_millis as u64),
         })
     }
@@ -72,6 +73,15 @@ mod tests {
         let payload = payload.unwrap();
         assert_eq!(payload.sleep_time, Duration::from_millis(982411011));
         assert_eq!(payload.response_size, 1300001 as u32);
+    }
+
+    #[test]
+    fn test_payload_from_header_zeros() {
+        let val = HeaderValue::from_static("0,0");
+        let payload = Payload::from_header(Some(&val));
+        let payload = payload.unwrap();
+        assert_eq!(payload.sleep_time, Duration::from_millis(0));
+        assert_eq!(payload.response_size, 0 as u32);
     }
 
     #[test]

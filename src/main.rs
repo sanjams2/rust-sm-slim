@@ -13,7 +13,7 @@ use std::num::ParseIntError;
 // http related constants
 const PING_PATH: &str = "/ping";
 const INVOCATION_PATH: &str = "/invocations";
-const CUSTOM_ATTR_HEADER: &str = "X-SageMaker-Custom-Attribute";
+const CUSTOM_ATTR_HEADER: &str = "X-Amzn-SageMaker-Custom-Attributes";
 // https://www.asciitable.com/
 const BYTES: &[u8; 25000000] = &[65 as u8; 25000000]; // 'A'.to_digit(10).unwrap() as u8;
 

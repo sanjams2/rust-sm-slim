@@ -18,7 +18,7 @@ Any request without the Custom Attributes header or with a header value not comp
 `400 BadRequest` response returned.
 
 The container also honors the `SAGEMAKER_BIND_TO_PORT` environment variable and will configure the server to listen
-on the port specified by this variable. This allows the container to be used in a Multi-Model Endpoint.
+on the port specified by this variable. This allows the container to be used in a Multi-Container Endpoint.
 
 #### Example
 
